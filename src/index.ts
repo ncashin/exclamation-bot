@@ -1,39 +1,28 @@
-import dotenv from "dotenv";
-import OpenAI from "openai";
 import { Client } from "discord.js";
-
-dotenv.config();
-const openai = new OpenAI();
-
-const { DISCORD_TOKEN, DISCORD_CLIENT_ID } = process.env;
-
-if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
-  throw new Error("Missing environment variables");
-}
-
-export const config = {
-  DISCORD_TOKEN,
-  DISCORD_CLIENT_ID,
-};
+import { config, openai } from "./config";
+import { commands } from "./commands";
+import { deployCommands } from "./deployCommands";
 
 const client = new Client({
   intents: ["Guilds", "GuildMessages", "DirectMessages"],
 });
+
 client.once("ready", () => {
   console.log("Discord bot is ready! 🤖");
 });
 
-const aiCall = async () => {
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: "You are a helpful assistant." },
-      {
-        role: "user",
-        content: "Write a haiku about recursion in programming.",
-      },
-    ],
-  });
-  console.log(completion.choices[0].message);
-};
-aiCall();
+client.on("guildCreate", async (guild) => {
+  await deployCommands({ guildId: guild.id });
+});
+
+client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isCommand()) {
+    return;
+  }
+  const { commandName } = interaction;
+  if (commands[commandName as keyof typeof commands]) {
+    commands[commandName as keyof typeof commands].execute(interaction);
+  }
+});
+
+client.login(config.DISCORD_TOKEN);
