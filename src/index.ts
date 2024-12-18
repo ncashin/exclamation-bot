@@ -16,7 +16,7 @@ export const config = {
 
 const openai = new OpenAI();
 
-const ai_call = async () => {
+const aiCall = async () => {
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
@@ -30,4 +30,4 @@ const ai_call = async () => {
   console.log(completion.choices[0].message);
 };
 
-ai_call();
+aiCall();
