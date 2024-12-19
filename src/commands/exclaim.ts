@@ -3,19 +3,34 @@ import { openai } from "../config";
 
 export const data = new SlashCommandBuilder()
   .setName("exclaim")
-  .setDescription("Respond!");
+  .setDescription("Exclaim!");
+
+const prompt = `
+  Instructions:
+  - Given the following description, generate an output.
+  - Emphatic exclamations that convey strong emotions or judgments. These exclamations are typically used to underscore viewpoints, rally support, or criticize opponents and media. They tend to be short, impactful words or phrases, often in all caps to increase emphasis. The exclamations are usually between 1 and 3 words long.
+  - Return only the generated output, with anywhere from 1 (inclusive) exclamation marks at the end.
+Discord
+Input:\n
+  `;
 
 export async function execute(interaction: CommandInteraction) {
+  const lastMessageId = interaction.channel?.lastMessageId;
+  const help = interaction.channel?.messages.fetch(lastMessageId);
+  const messageContent = help?.content;
+  if (messageContent.length() === 0) {
+    interaction.reply("Nothing!");
+  }
+  console.log(messageContent);
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
-      { role: "system", content: "You are a helpful assistant." },
       {
         role: "user",
-        content: "Write a haiku about recursion in programming.",
+        content: prompt + messageContent,
       },
     ],
   });
-  console.log(completion.choices[0]);
-  return interaction.reply("Pong!");
+  const response = completion.choices[0].message.content;
+  return interaction.reply(response);
 }
