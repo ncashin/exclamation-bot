@@ -17,13 +17,14 @@ const prompt = `
   `;
 
 export async function execute(interaction: CommandInteraction) {
-  const lastMessageId = interaction.channel?.lastMessageId;
+  const lastMessageId = (interaction.channel as any)?.lastMessageId as string;
   const help = interaction.channel?.messages.fetch(lastMessageId);
-  const messageContent = help?.content;
-  if (messageContent === "") {
+  const messageContent = (help as any)?.content;
+  if (messageContent === "" && messageContent === undefined) {
     interaction.reply("Nothing!");
+    return;
   }
-  console.log(messageContent);
+
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
@@ -34,6 +35,9 @@ export async function execute(interaction: CommandInteraction) {
     ],
   });
   const response = completion.choices[0].message.content;
-  console.log(completion);
+  if (response === null) {
+    interaction.reply("Nothing!");
+    return;
+  }
   return interaction.reply(response);
 }
