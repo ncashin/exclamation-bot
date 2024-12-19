@@ -23,14 +23,23 @@ client.once("ready", () => {
   console.log("Discord bot is ready! 🤖");
 });
 
+const prompt = `  
+Generate a single impactful word that supports the sentiment of the input below. The output should capture the essence or emotional tone of the message. For instance, a threatening message should end with a word that conveys threat.
+
+- The resulting word should be in all caps to emphasize emotion.
+- Include between 1 and 10 exclamation marks at the end, to further convey sentiment strength.
+- The output should directly align with the author's sentiment or intent shown in the message.
+Input:
+  He’s spent the last few weeks hitting tricks on the scooter. Wont do any work, just the scooter. He says they can’t fire him because they can’t catch him
+`
+
 const aiCall = async () => {
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
-      { role: "system", content: "You are a helpful assistant." },
       {
         role: "user",
-        content: "Write a haiku about recursion in programming.",
+        content: prompt,
       },
     ],
   });
