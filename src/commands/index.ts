@@ -1,5 +1,5 @@
-import * as ping from "./ping";
+import * as exclaim from "./exclaim";
 
 export const commands = {
-  ping,
+  exclaim,
 };
